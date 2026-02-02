@@ -1,3 +1,4 @@
+#Exit the loop when i is 3:
 i = 1
 while i < 6:
   print(i)

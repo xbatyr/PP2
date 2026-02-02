@@ -1,4 +1,4 @@
-n = int(input())
+n = int(input())cd
 db = {}
 for _ in range(n):
     line = input().strip()
