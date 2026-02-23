@@ -16,7 +16,7 @@ print(f"Area = {area}")
 n = int(input())
 s = float(input())
 area = (n * s * s) / (4 * math.tan(math.pi / n))
-print(f"The area of the polygon = {area:g}")
+print(f"The area of the polygon = {area}")
 
 # 4
 base = float(input())
