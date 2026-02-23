@@ -3,7 +3,7 @@ import math
 # 1
 deg = float(input())
 rad = deg * (math.pi / 180)
-print(f"Radian: {rad:.6f}")
+print(f"Radian: {rad}")
 
 # 2
 h = float(input())
