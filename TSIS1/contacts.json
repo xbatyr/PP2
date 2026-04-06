@@ -1,0 +1,255 @@
+[
+    {
+        "name": "Ali",
+        "main_phone": "87001112233",
+        "email": null,
+        "birthday": null,
+        "group": null,
+        "phones": []
+    },
+    {
+        "name": "Aruzhan",
+        "main_phone": "87011111111",
+        "email": null,
+        "birthday": null,
+        "group": null,
+        "phones": []
+    },
+    {
+        "name": "Aigerim",
+        "main_phone": "87012222222",
+        "email": null,
+        "birthday": null,
+        "group": null,
+        "phones": []
+    },
+    {
+        "name": "Dias",
+        "main_phone": "87013333333",
+        "email": null,
+        "birthday": null,
+        "group": null,
+        "phones": []
+    },
+    {
+        "name": "Nursultan",
+        "main_phone": "87014444444",
+        "email": null,
+        "birthday": null,
+        "group": null,
+        "phones": []
+    },
+    {
+        "name": "Madina",
+        "main_phone": "87015555555",
+        "email": null,
+        "birthday": null,
+        "group": null,
+        "phones": []
+    },
+    {
+        "name": "Adilet",
+        "main_phone": "87016666666",
+        "email": null,
+        "birthday": null,
+        "group": null,
+        "phones": []
+    },
+    {
+        "name": "Alina",
+        "main_phone": "87017777777",
+        "email": null,
+        "birthday": null,
+        "group": null,
+        "phones": []
+    },
+    {
+        "name": "Sanzhar",
+        "main_phone": "87018888888",
+        "email": null,
+        "birthday": null,
+        "group": null,
+        "phones": []
+    },
+    {
+        "name": "Dinara",
+        "main_phone": "87019999999",
+        "email": null,
+        "birthday": null,
+        "group": null,
+        "phones": []
+    },
+    {
+        "name": "Yerassyl",
+        "main_phone": "87012344321",
+        "email": null,
+        "birthday": null,
+        "group": null,
+        "phones": []
+    },
+    {
+        "name": "Ayana",
+        "main_phone": "87011223344",
+        "email": null,
+        "birthday": null,
+        "group": null,
+        "phones": []
+    },
+    {
+        "name": "Bekzat",
+        "main_phone": "87015554433",
+        "email": null,
+        "birthday": null,
+        "group": null,
+        "phones": []
+    },
+    {
+        "name": "Tomiris",
+        "main_phone": "87017774411",
+        "email": null,
+        "birthday": null,
+        "group": null,
+        "phones": []
+    },
+    {
+        "name": "Ramazan",
+        "main_phone": "87019994422",
+        "email": null,
+        "birthday": null,
+        "group": null,
+        "phones": []
+    },
+    {
+        "name": "Mereke",
+        "main_phone": "87011112222",
+        "email": null,
+        "birthday": null,
+        "group": null,
+        "phones": []
+    },
+    {
+        "name": "Zhanel",
+        "main_phone": "87013334455",
+        "email": null,
+        "birthday": null,
+        "group": null,
+        "phones": []
+    },
+    {
+        "name": "Arsen",
+        "main_phone": "87015556677",
+        "email": null,
+        "birthday": null,
+        "group": null,
+        "phones": []
+    },
+    {
+        "name": "Aisha",
+        "main_phone": "87017778899",
+        "email": null,
+        "birthday": null,
+        "group": null,
+        "phones": []
+    },
+    {
+        "name": "Daulet",
+        "main_phone": "87018887766",
+        "email": null,
+        "birthday": null,
+        "group": null,
+        "phones": []
+    },
+    {
+        "name": "Aldiyar",
+        "main_phone": "87019991100",
+        "email": null,
+        "birthday": null,
+        "group": null,
+        "phones": []
+    },
+    {
+        "name": "Batyr",
+        "main_phone": "87001117777",
+        "email": null,
+        "birthday": null,
+        "group": null,
+        "phones": []
+    },
+    {
+        "name": "ahaha",
+        "main_phone": "123123123",
+        "email": null,
+        "birthday": null,
+        "group": null,
+        "phones": []
+    },
+    {
+        "name": "Ali",
+        "main_phone": "87001112233",
+        "email": null,
+        "birthday": null,
+        "group": null,
+        "phones": []
+    },
+    {
+        "name": "Aruzhan",
+        "main_phone": "87015556677",
+        "email": null,
+        "birthday": null,
+        "group": null,
+        "phones": []
+    },
+    {
+        "name": "Dias",
+        "main_phone": "87017778899",
+        "email": null,
+        "birthday": null,
+        "group": null,
+        "phones": []
+    },
+    {
+        "name": "Aseka",
+        "main_phone": "87001112324",
+        "email": null,
+        "birthday": null,
+        "group": null,
+        "phones": []
+    },
+    {
+        "name": "Alibek",
+        "main_phone": "77089992222",
+        "email": null,
+        "birthday": null,
+        "group": null,
+        "phones": []
+    },
+    {
+        "name": "Alib",
+        "main_phone": "87079531233",
+        "email": null,
+        "birthday": null,
+        "group": null,
+        "phones": []
+    },
+    {
+        "name": "Dima",
+        "main_phone": "77079991235",
+        "email": null,
+        "birthday": null,
+        "group": null,
+        "phones": []
+    },
+    {
+        "name": "batyr",
+        "main_phone": "77079753455",
+        "email": "batyr667@mail.ru",
+        "birthday": "2007-03-28",
+        "group": "owrk",
+        "phones": [
+            {
+                "phone": "77079753455",
+                "type": "work"
+            }
+        ]
+    }
+]
