@@ -9,6 +9,7 @@ CELL = 20
 COLS = WIDTH // CELL
 ROWS = HEIGHT // CELL
 FPS = 60
+GRID_COLOR = (30, 30, 30)
 
 WHITE = (255, 255, 255)
 BLACK = (0, 0, 0)
@@ -49,7 +50,6 @@ class SnakeGame:
         self.level = 1
         self.foods = 0
         self.over = False
-        self.saved = False
         self.shield = False
         self.effect = ""
         self.effect_end = 0
@@ -79,6 +79,7 @@ class SnakeGame:
                 return cell
 
     def make_food(self):
+        # normal food from practice 11
         cell = self.free_cell()
         weight = random.choices([1, 2, 3], weights=[50, 35, 15])[0]
         color = RED if weight == 1 else ORANGE if weight == 2 else YELLOW
@@ -172,11 +173,20 @@ class SnakeGame:
             self.set_message("Speed up" if self.effect == "speed" else "Slow motion")
         self.power = None
 
+    def power_text(self):
+        if self.shield:
+            return "Power: shield"
+        if self.effect:
+            left = max(0, (self.effect_end - pygame.time.get_ticks()) // 1000 + 1)
+            return f"Power: {self.effect} {left}s"
+        return "Power: none"
+
     def update(self):
         now = pygame.time.get_ticks()
         if self.over:
             return
 
+        # timers for food and power-ups
         if now > self.food["end"]:
             self.food = self.make_food()
         if self.power and now > self.power["end"]:
@@ -228,9 +238,9 @@ class SnakeGame:
 
         if self.settings["grid"]:
             for x in range(0, WIDTH, CELL):
-                pygame.draw.line(screen, (30, 30, 30), (x, 0), (x, HEIGHT))
+                pygame.draw.line(screen, GRID_COLOR, (x, 0), (x, HEIGHT))
             for y in range(0, HEIGHT, CELL):
-                pygame.draw.line(screen, (30, 30, 30), (0, y), (WIDTH, y))
+                pygame.draw.line(screen, GRID_COLOR, (0, y), (WIDTH, y))
 
         for cell in self.obstacles:
             self.draw_cell(screen, cell, LIGHT, WHITE)
@@ -257,13 +267,7 @@ class SnakeGame:
         for i, text in enumerate(hud):
             screen.blit(font.render(text, True, WHITE), (12, 10 + i * 30))
 
-        extra = "Power: none"
-        if self.shield:
-            extra = "Power: shield"
-        elif self.effect:
-            left = max(0, (self.effect_end - pygame.time.get_ticks()) // 1000 + 1)
-            extra = f"Power: {self.effect} {left}s"
-        screen.blit(font.render(extra, True, CYAN), (12, 132))
+        screen.blit(font.render(self.power_text(), True, CYAN), (12, 132))
 
         if self.message and pygame.time.get_ticks() < self.message_end:
             msg = font.render(self.message, True, YELLOW)

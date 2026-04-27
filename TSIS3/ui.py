@@ -16,6 +16,7 @@ class Button:
         mouse = pygame.mouse.get_pos()
         color = BLUE if active else LIGHT
         if self.rect.collidepoint(mouse):
+            # make hover a little lighter
             color = (min(color[0] + 12, 255), min(color[1] + 12, 255), min(color[2] + 12, 255))
         pygame.draw.rect(screen, color, self.rect, border_radius=8)
         pygame.draw.rect(screen, BLACK, self.rect, 2, border_radius=8)

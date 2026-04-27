@@ -63,7 +63,7 @@ font = pygame.font.SysFont("verdana", 24)
 small_font = pygame.font.SysFont("verdana", 18)
 
 settings = load_settings()
-db_ready = init_db()
+init_db()
 
 state = "menu"
 username = ""
@@ -184,6 +184,50 @@ def draw_game_over():
         button.draw(screen, font)
 
 
+def handle_menu_click(pos):
+    global state, top_scores, running
+    for action, button in menu_buttons:
+        if not button.rect.collidepoint(pos):
+            continue
+        if action == "play":
+            start_game()
+        elif action == "leaderboard":
+            top_scores = get_top_scores()
+            state = "leaderboard"
+        elif action == "settings":
+            state = "settings"
+        else:
+            running = False
+        break
+
+
+def handle_game_keys(key):
+    if key in (pygame.K_UP, pygame.K_w):
+        game.change_direction(UP)
+    elif key in (pygame.K_DOWN, pygame.K_s):
+        game.change_direction(DOWN)
+    elif key in (pygame.K_LEFT, pygame.K_a):
+        game.change_direction(LEFT)
+    elif key in (pygame.K_RIGHT, pygame.K_d):
+        game.change_direction(RIGHT)
+
+
+def handle_settings_click(pos):
+    global state
+    if grid_button.rect.collidepoint(pos):
+        settings["grid"] = not settings["grid"]
+    elif sound_button.rect.collidepoint(pos):
+        settings["sound"] = not settings["sound"]
+    else:
+        for color, button in color_buttons:
+            if button.rect.collidepoint(pos):
+                settings["snake_color"] = color
+
+    if save_back_button.rect.collidepoint(pos):
+        save_settings(settings)
+        state = "menu"
+
+
 running = True
 while running:
     for event in pygame.event.get():
@@ -200,32 +244,11 @@ while running:
                     username += event.unicode
 
             elif event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
-                for action, button in menu_buttons:
-                    if button.rect.collidepoint(event.pos):
-                        if action == "play":
-                            start_game()
-                        elif action == "leaderboard":
-                            top_scores = get_top_scores()
-                            state = "leaderboard"
-                        elif action == "settings":
-                            state = "settings"
-                        else:
-                            running = False
+                handle_menu_click(event.pos)
 
         elif state == "settings":
             if event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
-                if grid_button.rect.collidepoint(event.pos):
-                    settings["grid"] = not settings["grid"]
-                elif sound_button.rect.collidepoint(event.pos):
-                    settings["sound"] = not settings["sound"]
-                else:
-                    for color, button in color_buttons:
-                        if button.rect.collidepoint(event.pos):
-                            settings["snake_color"] = color
-
-                if save_back_button.rect.collidepoint(event.pos):
-                    save_settings(settings)
-                    state = "menu"
+                handle_settings_click(event.pos)
 
         elif state == "leaderboard":
             if event.type == pygame.MOUSEBUTTONDOWN and event.button == 1 and back_button.rect.collidepoint(event.pos):
@@ -233,16 +256,10 @@ while running:
 
         elif state == "game":
             if event.type == pygame.KEYDOWN:
-                if event.key in (pygame.K_UP, pygame.K_w):
-                    game.change_direction(UP)
-                elif event.key in (pygame.K_DOWN, pygame.K_s):
-                    game.change_direction(DOWN)
-                elif event.key in (pygame.K_LEFT, pygame.K_a):
-                    game.change_direction(LEFT)
-                elif event.key in (pygame.K_RIGHT, pygame.K_d):
-                    game.change_direction(RIGHT)
-                elif event.key == pygame.K_ESCAPE:
+                if event.key == pygame.K_ESCAPE:
                     state = "menu"
+                else:
+                    handle_game_keys(event.key)
 
         elif state == "game_over":
             if event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
@@ -263,6 +280,7 @@ while running:
         draw_leaderboard()
 
     elif state == "game":
+        # save result once after game over
         game.update()
         game.draw(screen, font, small_font)
         if game.over and not result_saved:
