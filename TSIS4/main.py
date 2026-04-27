@@ -45,6 +45,7 @@ class Button:
         self.text = text
 
     def draw(self, screen, font, active=False):
+        # hover makes buttons feel more alive
         color = BLUE if active else (235, 235, 235)
         if self.rect.collidepoint(pygame.mouse.get_pos()):
             color = (245, 245, 245) if not active else (110, 180, 255)
@@ -114,6 +115,7 @@ def draw_menu():
     screen.fill((224, 236, 228))
     draw_panel(pygame.Rect(150, 40, 500, 110))
     draw_text("TSIS 4 SNAKE", WIDTH // 2, 90, center=True, use_title=True)
+    # name is typed right in the menu
     draw_text("Username", 240, 170)
     draw_panel(pygame.Rect(240, 200, 320, 46))
     draw_text(username or "Type name here...", 258, 212, PURPLE if username else (120, 120, 120), use_small=not username)
@@ -151,6 +153,7 @@ def draw_leaderboard():
 
     y = 155
     if top_scores:
+        # show top 10 from postgres
         for i, row in enumerate(top_scores, start=1):
             date_text = row[3].strftime("%Y-%m-%d") if row[3] else "-"
             draw_text(i, 85, y, use_small=True)
@@ -202,6 +205,7 @@ def handle_menu_click(pos):
 
 
 def handle_game_keys(key):
+    # arrows and wasd do the same thing
     if key in (pygame.K_UP, pygame.K_w):
         game.change_direction(UP)
     elif key in (pygame.K_DOWN, pygame.K_s):
@@ -219,6 +223,7 @@ def handle_settings_click(pos):
     elif sound_button.rect.collidepoint(pos):
         settings["sound"] = not settings["sound"]
     else:
+        # click a color box to repaint the snake
         for color, button in color_buttons:
             if button.rect.collidepoint(pos):
                 settings["snake_color"] = color
@@ -230,6 +235,7 @@ def handle_settings_click(pos):
 
 running = True
 while running:
+    # each screen has its own small event logic
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             running = False

@@ -29,31 +29,44 @@ def connect():
     if not psycopg2:
         LAST_DB_ERROR = "psycopg2 is not installed"
         return None
+
+    config = load_config()
     try:
-        config = load_config().copy()
-        if "database" in config and "dbname" not in config:
-            config["dbname"] = config.pop("database")
         LAST_DB_ERROR = ""
-        return psycopg2.connect(**config)
+        return psycopg2.connect(
+            host=config.get("host", "localhost"),
+            dbname=config.get("dbname") or config.get("database"),
+            user=config.get("user", ""),
+            password=config.get("password", ""),
+            port=config.get("port", 5432),
+        )
     except Exception as error:
         LAST_DB_ERROR = str(error)
         return None
+
+
+def close_db(conn, cur=None):
+    if cur:
+        cur.close()
+    if conn:
+        conn.close()
 
 
 def init_db():
     conn = connect()
     if not conn:
         return False
+    cur = None
     try:
         cur = conn.cursor()
         cur.execute(SCHEMA)
         conn.commit()
-        cur.close()
-        conn.close()
+        close_db(conn, cur)
         return True
     except Exception as error:
         global LAST_DB_ERROR
         LAST_DB_ERROR = str(error)
+        close_db(conn, cur)
         return False
 
 
@@ -71,6 +84,7 @@ def save_result(username, score, level):
     conn = connect()
     if not conn:
         return False
+    cur = None
     try:
         cur = conn.cursor()
         player_id = get_player_id(cur, username or "Player")
@@ -79,12 +93,12 @@ def save_result(username, score, level):
             (player_id, int(score), int(level)),
         )
         conn.commit()
-        cur.close()
-        conn.close()
+        close_db(conn, cur)
         return True
     except Exception as error:
         global LAST_DB_ERROR
         LAST_DB_ERROR = str(error)
+        close_db(conn, cur)
         return False
 
 
@@ -94,6 +108,7 @@ def get_personal_best(username):
     conn = connect()
     if not conn:
         return 0
+    cur = None
     try:
         cur = conn.cursor()
         cur.execute(
@@ -106,12 +121,12 @@ def get_personal_best(username):
             (username,),
         )
         row = cur.fetchone()
-        cur.close()
-        conn.close()
+        close_db(conn, cur)
         return row[0] or 0
     except Exception as error:
         global LAST_DB_ERROR
         LAST_DB_ERROR = str(error)
+        close_db(conn, cur)
         return 0
 
 
@@ -119,6 +134,7 @@ def get_top_scores():
     conn = connect()
     if not conn:
         return []
+    cur = None
     try:
         cur = conn.cursor()
         cur.execute(
@@ -131,12 +147,12 @@ def get_top_scores():
             """
         )
         rows = cur.fetchall()
-        cur.close()
-        conn.close()
+        close_db(conn, cur)
         return rows
     except Exception as error:
         global LAST_DB_ERROR
         LAST_DB_ERROR = str(error)
+        close_db(conn, cur)
         return []
 
 

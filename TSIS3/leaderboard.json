@@ -1,8 +1,50 @@
 [
   {
+    "name": "\u044c\u043b\u044c\u044c",
+    "score": 7294,
+    "distance": 5404,
+    "coins": 36
+  },
+  {
+    "name": "342",
+    "score": 4810,
+    "distance": 3600,
+    "coins": 23
+  },
+  {
+    "name": "342",
+    "score": 4706,
+    "distance": 3526,
+    "coins": 20
+  },
+  {
+    "name": "123",
+    "score": 3627,
+    "distance": 3207,
+    "coins": 7
+  },
+  {
     "name": "12321312",
     "score": 3622,
     "distance": 3202,
+    "coins": 7
+  },
+  {
+    "name": "123",
+    "score": 3595,
+    "distance": 3205,
+    "coins": 7
+  },
+  {
+    "name": "123123123",
+    "score": 3535,
+    "distance": 3205,
+    "coins": 6
+  },
+  {
+    "name": "123",
+    "score": 3500,
+    "distance": 3200,
     "coins": 7
   },
   {
@@ -16,47 +58,5 @@
     "score": 3117,
     "distance": 2877,
     "coins": 6
-  },
-  {
-    "name": "Batyr",
-    "score": 3043,
-    "distance": 2683,
-    "coins": 6
-  },
-  {
-    "name": "123123123123",
-    "score": 3032,
-    "distance": 2822,
-    "coins": 5
-  },
-  {
-    "name": "Batyr",
-    "score": 2938,
-    "distance": 2638,
-    "coins": 5
-  },
-  {
-    "name": "batyr",
-    "score": 2882,
-    "distance": 2612,
-    "coins": 5
-  },
-  {
-    "name": "123123123123",
-    "score": 1781,
-    "distance": 1691,
-    "coins": 2
-  },
-  {
-    "name": "batyr",
-    "score": 1702,
-    "distance": 1612,
-    "coins": 2
-  },
-  {
-    "name": "batyr",
-    "score": 1082,
-    "distance": 1052,
-    "coins": 1
   }
 ]

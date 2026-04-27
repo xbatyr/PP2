@@ -28,8 +28,9 @@ CAR_W = 50
 CAR_H = 86
 
 BASE_SPEED = {"easy": 6, "normal": 7, "hard": 8}
-FINISH_DISTANCE = {"easy": 2500, "normal": 3200, "hard": 4000}
+FINISH_DISTANCE = {"easy": 4200, "normal": 5400, "hard": 6800}
 DIFF_BONUS = {"easy": 0, "normal": 10, "hard": 20}
+DISTANCE_STEP = 0.28
 
 CAR_COLORS = {
     "blue": BLUE,
@@ -112,6 +113,7 @@ class RacerGame:
         self.coin_value = 0
         self.bonus = 0
         self.score = 0
+        self.progress = 0
         self.distance = 0
         self.finish_distance = FINISH_DISTANCE[self.settings["difficulty"]]
 
@@ -123,7 +125,7 @@ class RacerGame:
         self.power_time = 0
         self.slow_time = 0
         self.strip_time = 0
-        self.hit_cooldown = 45
+        self.hit_cooldown = 60
         self.message = "GO!"
         self.message_time = 70
 
@@ -170,6 +172,42 @@ class RacerGame:
                     return True
         return False
 
+    def moving_barrier_active(self):
+        for item in self.events:
+            if item["kind"] == "moving_barrier" and -40 < item["y"] < 320:
+                return True
+        return False
+
+    def blocked_lanes(self):
+        # these are lanes that are dangerous right now
+        blocked = set()
+
+        for item in self.traffic:
+            if -80 < item["y"] < 320:
+                blocked.add(item["lane"])
+
+        for item in self.hazards:
+            if item["kind"] in ["barrier", "pothole"] and -60 < item["y"] < 320:
+                blocked.add(item["lane"])
+
+        return blocked
+
+    def spawn_lane(self, avoid_player=True):
+        blocked = self.blocked_lanes()
+        lanes = [0, 1, 2]
+        random.shuffle(lanes)
+
+        for lane in lanes:
+            if avoid_player and lane == self.player_lane:
+                continue
+            if lane in blocked:
+                continue
+            if self.lane_busy(lane):
+                continue
+            return lane
+
+        return None
+
     def pick_lane(self, avoid_player=True):
         lanes = [0, 1, 2]
         random.shuffle(lanes)
@@ -183,10 +221,10 @@ class RacerGame:
         return random.choice(lanes)
 
     def speed_now(self):
-        level = 1 + self.distance // 700
+        level = 1 + self.progress // 700
         speed = BASE_SPEED[self.settings["difficulty"]]
-        speed += level * 0.35
-        speed += self.coin_value * 0.02
+        speed += level * 0.28
+        speed += self.coin_value * 0.015
 
         if self.active_power == "nitro":
             speed += 3
@@ -203,32 +241,60 @@ class RacerGame:
         self.coins_list.append({"lane": lane, "x": LANES[lane], "y": -30, "weight": weight})
 
     def spawn_traffic(self):
-        lane = self.pick_lane(True)
+        # do not create full road lock
+        if self.moving_barrier_active() or len(self.blocked_lanes()) >= 2:
+            return
+
+        lane = self.spawn_lane(True)
+        if lane is None:
+            return
+
         color_name = random.choice(list(CAR_COLORS.keys()))
         self.traffic.append({"lane": lane, "x": LANES[lane], "y": -90, "color_name": color_name})
 
     def spawn_hazards(self):
-        # leave one safe lane
-        safe_lane = random.randint(0, 2)
+        # keep at least one free lane
+        if self.moving_barrier_active():
+            return
+
+        blocked = self.blocked_lanes()
+        free_lanes = []
         for lane in [0, 1, 2]:
-            if lane == safe_lane or self.lane_busy(lane):
-                continue
+            if lane not in blocked and not self.lane_busy(lane):
+                free_lanes.append(lane)
+
+        if len(free_lanes) <= 1:
+            return
+
+        random.shuffle(free_lanes)
+        safe_lane = free_lanes[0]
+        for lane in free_lanes[1:]:
             kind = random.choice(["barrier", "oil", "pothole"])
             self.hazards.append({"lane": lane, "x": LANES[lane], "y": -40, "kind": kind})
+
+            # if another lane is already blocked, add only one new hazard
+            if blocked or random.random() < 0.5:
+                break
 
     def spawn_event(self):
         kind = random.choice(["moving_barrier", "speed_bump", "boost_strip"])
         if kind == "moving_barrier":
+            if self.moving_barrier_active() or self.blocked_lanes():
+                return
             self.events.append({"kind": kind, "x": ROAD_LEFT + 30, "y": -25, "dx": 4})
             return
 
-        lane = self.pick_lane(False)
+        lane = self.spawn_lane(False)
+        if lane is None:
+            return
         self.events.append({"kind": kind, "lane": lane, "x": LANES[lane], "y": -20})
 
     def spawn_powerup(self):
         if self.powerups:
             return
-        lane = self.pick_lane(True)
+        lane = self.spawn_lane(True)
+        if lane is None:
+            return
         kind = random.choice(["nitro", "shield", "repair"])
         self.powerups.append({"lane": lane, "x": LANES[lane], "y": -30, "kind": kind, "time": 360})
 
@@ -236,14 +302,14 @@ class RacerGame:
         if self.active_power == "shield":
             self.active_power = ""
             self.power_time = 0
-            self.hit_cooldown = 45
+            self.hit_cooldown = 70
             self.bonus += 30
             self.say("Shield used")
             return True
 
         if self.extra_hit > 0:
             self.extra_hit -= 1
-            self.hit_cooldown = 45
+            self.hit_cooldown = 70
             self.bonus += 20
             self.say("Repair saved you")
             return True
@@ -284,16 +350,16 @@ class RacerGame:
         if self.coin_timer > max(18, 45 - level):
             self.spawn_coin()
             self.coin_timer = 0
-        if self.traffic_timer > max(34, 100 - level * 5 - diff):
+        if self.traffic_timer > max(42, 116 - level * 4 - diff):
             self.spawn_traffic()
             self.traffic_timer = 0
-        if self.hazard_timer > max(85, 180 - level * 8 - diff):
+        if self.hazard_timer > max(95, 205 - level * 7 - diff):
             self.spawn_hazards()
             self.hazard_timer = 0
-        if self.event_timer > max(170, 320 - level * 10 - diff):
+        if self.event_timer > max(190, 350 - level * 9 - diff):
             self.spawn_event()
             self.event_timer = 0
-        if self.power_timer > 340:
+        if self.power_timer > 300:
             self.spawn_powerup()
             self.power_timer = 0
 
@@ -330,7 +396,7 @@ class RacerGame:
 
             if player.colliderect(rect):
                 if item["kind"] == "oil":
-                    self.slow_time = 90
+                    self.slow_time = 55
                     self.bonus += 5
                     self.say("Oil spill", 40)
                 else:
@@ -353,11 +419,11 @@ class RacerGame:
 
             if player.colliderect(rect):
                 if item["kind"] == "boost_strip":
-                    self.strip_time = 80
+                    self.strip_time = 95
                     self.bonus += 20
                     self.say("Boost strip!", 50)
                 elif item["kind"] == "speed_bump":
-                    self.slow_time = 50
+                    self.slow_time = 35
                     self.say("Speed bump", 40)
                 else:
                     self.hit_player()
@@ -401,12 +467,13 @@ class RacerGame:
             return
 
         speed = self.speed_now()
-        level = 1 + self.distance // 700
+        level = 1 + self.progress // 700
         diff = DIFF_BONUS[self.settings["difficulty"]]
 
         self.road_y = (self.road_y + speed) % HEIGHT
-        self.distance += speed
-        self.player_x += (self.target_x - self.player_x) * 0.28
+        self.progress += speed
+        self.distance += speed * DISTANCE_STEP
+        self.player_x += (self.target_x - self.player_x) * 0.38
         self.update_power()
         self.update_spawns(level, diff)
 
