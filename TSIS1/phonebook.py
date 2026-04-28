@@ -3,11 +3,13 @@ import csv
 import json
 
 
+# phonebook with postgres
 class PhoneBook:
     def __init__(self):
         pass
 
     def add_extended_contact(self):
+        # add one contact with many phones
         name = input("Enter name: ").strip()
         email = input("Enter email: ").strip()
         birthday = input("Enter birthday (YYYY-MM-DD): ").strip()
@@ -22,6 +24,7 @@ class PhoneBook:
         row = cur.fetchone()
 
         if row is None:
+            # make group if needed
             cur.execute(
                 "INSERT INTO groups(name) VALUES (%s) RETURNING id",
                 (group_name,)
@@ -46,6 +49,7 @@ class PhoneBook:
         )
         contact_id = cur.fetchone()[0]
 
+        # save main phone here too
         cur.execute(
             """
             INSERT INTO phones(contact_id, phone, type)
@@ -55,6 +59,7 @@ class PhoneBook:
         )
 
         while True:
+            # add more phones if needed
             phone = input("Enter extra phone (or empty to stop): ").strip()
             if phone == "":
                 break
@@ -76,6 +81,7 @@ class PhoneBook:
         print("Contact added.")
 
     def add_phone(self):
+        # add one more phone
         name = input("Contact name: ").strip()
         phone = input("New phone: ").strip()
         p_type = input("Phone type (home/work/mobile): ").strip().lower()
@@ -92,6 +98,7 @@ class PhoneBook:
         print("Phone added.")
 
     def move_to_group(self):
+        # move contact to new group
         name = input("Contact name: ").strip()
         group_name = input("New group: ").strip()
 
@@ -107,6 +114,7 @@ class PhoneBook:
         print("Group changed.")
 
     def show_all_contacts(self):
+        # show main contact data
         conn = get_connection()
         cur = conn.cursor()
 
@@ -137,6 +145,7 @@ class PhoneBook:
         conn.close()
 
     def show_full_contacts(self):
+        # show contacts with all phones
         conn = get_connection()
         cur = conn.cursor()
 
@@ -169,6 +178,7 @@ class PhoneBook:
         conn.close()
 
     def filter_by_group(self):
+        # show contacts from one group
         group_name = input("Enter group: ").strip()
 
         conn = get_connection()
@@ -202,6 +212,7 @@ class PhoneBook:
         conn.close()
 
     def search_by_email(self):
+        # search by email part
         part = input("Enter email pattern: ").strip()
 
         conn = get_connection()
@@ -233,6 +244,7 @@ class PhoneBook:
         conn.close()
 
     def search_all_fields(self):
+        # search in all fields
         txt = input("Enter search text: ").strip()
 
         conn = get_connection()
@@ -251,6 +263,7 @@ class PhoneBook:
         conn.close()
 
     def sort_contacts(self):
+        # choose sort type
         print("Sort by:")
         print("1 - name")
         print("2 - birthday")
@@ -267,6 +280,7 @@ class PhoneBook:
             print("Wrong choice.")
             return
 
+        # use safe sort field
         conn = get_connection()
         cur = conn.cursor()
 
@@ -294,6 +308,7 @@ class PhoneBook:
         conn.close()
 
     def paginated_navigation(self):
+        # show contacts by pages
         limit_value = int(input("Enter page size: ").strip())
         offset_value = 0
 
@@ -328,6 +343,7 @@ class PhoneBook:
 
             cmd = input("\nnext / prev / quit: ").strip().lower()
 
+            # move to next or prev page
             if cmd == "next":
                 offset_value += limit_value
             elif cmd == "prev":
@@ -340,6 +356,7 @@ class PhoneBook:
                 print("Wrong command.")
 
     def export_to_json(self):
+        # save contacts to json
         file_name = "TSIS1/contacts.json"
 
         conn = get_connection()
@@ -366,6 +383,7 @@ class PhoneBook:
         for one in contacts:
             c_id = one[0]
 
+            # load extra phones
             cur.execute(
                 """
                 SELECT phone, type
@@ -384,6 +402,7 @@ class PhoneBook:
                     "type": ph[1]
                 })
 
+            # make one json item
             arr.append({
                 "name": one[1],
                 "main_phone": one[2],
@@ -402,6 +421,7 @@ class PhoneBook:
         print("Exported to JSON.")
 
     def import_from_json(self):
+        # load contacts from json
         file_name = "TSIS1/contacts.json"
 
         with open(file_name, "r", encoding="utf-8") as ff:
@@ -421,6 +441,7 @@ class PhoneBook:
             if (main_phone is None or main_phone == "") and len(phones_list) > 0:
                 main_phone = phones_list[0].get("phone")
 
+            # check old contact
             cur.execute(
                 "SELECT id FROM contacts WHERE first_name = %s ORDER BY id LIMIT 1",
                 (name,)
@@ -431,6 +452,7 @@ class PhoneBook:
             g_row = cur.fetchone()
 
             if g_row is None:
+                # make group if missing
                 cur.execute(
                     "INSERT INTO groups(name) VALUES (%s) RETURNING id",
                     (group_name,)
@@ -446,6 +468,7 @@ class PhoneBook:
                 if ans == "skip":
                     continue
                 elif ans == "overwrite":
+                    # replace old contact data
                     contact_id = old_row[0]
 
                     cur.execute(
@@ -474,6 +497,7 @@ class PhoneBook:
                     print("Skipped.")
                     continue
             else:
+                # add new contact
                 cur.execute(
                     """
                     INSERT INTO contacts(first_name, phone, email, birthday, group_id)
@@ -500,6 +524,7 @@ class PhoneBook:
         print("Imported from JSON.")
 
     def import_csv_extended(self):
+        # load contacts from csv
         file_name = "TSIS1/contacts.csv"
 
         conn = get_connection()
@@ -509,6 +534,7 @@ class PhoneBook:
             rr = csv.DictReader(ff)
 
             for row in rr:
+                # read one csv row
                 name = row["name"].strip()
                 email = row["email"].strip()
                 birthday = row["birthday"].strip()
@@ -520,6 +546,7 @@ class PhoneBook:
                 g_row = cur.fetchone()
 
                 if g_row is None:
+                    # make group if needed
                     cur.execute(
                         "INSERT INTO groups(name) VALUES (%s) RETURNING id",
                         (group_name,)
@@ -535,6 +562,7 @@ class PhoneBook:
                 c_row = cur.fetchone()
 
                 if c_row is None:
+                    # make contact if needed
                     cur.execute(
                         """
                         INSERT INTO contacts(first_name, phone, email, birthday, group_id)
@@ -553,6 +581,7 @@ class PhoneBook:
                 else:
                     contact_id = c_row[0]
 
+                # save csv phone
                 cur.execute(
                     """
                     INSERT INTO phones(contact_id, phone, type)
@@ -568,6 +597,7 @@ class PhoneBook:
         print("CSV imported.")
 
     def menu(self):
+        # main menu
         while True:
             print("\nTSIS 1 PhoneBook")
             print("1 - Add extended contact")
@@ -620,5 +650,6 @@ class PhoneBook:
                 print("Wrong choice")
 
 
+# start the app
 app = PhoneBook()
 app.menu()

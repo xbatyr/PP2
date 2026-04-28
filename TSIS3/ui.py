@@ -1,6 +1,7 @@
 import pygame
 
 
+# ui colors
 WHITE = (255, 255, 255)
 BLACK = (0, 0, 0)
 LIGHT = (235, 235, 235)
@@ -13,10 +14,10 @@ class Button:
         self.text = text
 
     def draw(self, screen, font, active=False):
+        # button gets lighter on hover
         mouse = pygame.mouse.get_pos()
         color = BLUE if active else LIGHT
         if self.rect.collidepoint(mouse):
-            # make hover a little lighter
             color = (min(color[0] + 12, 255), min(color[1] + 12, 255), min(color[2] + 12, 255))
         pygame.draw.rect(screen, color, self.rect, border_radius=8)
         pygame.draw.rect(screen, BLACK, self.rect, 2, border_radius=8)
@@ -25,6 +26,7 @@ class Button:
 
 
 def draw_text(screen, text, font, color, x, y, center=False):
+    # draw normal or centered text
     image = font.render(str(text), True, color)
     rect = image.get_rect()
     if center:
@@ -35,5 +37,6 @@ def draw_text(screen, text, font, color, x, y, center=False):
 
 
 def draw_box(screen, rect, fill=(245, 245, 245)):
+    # draw simple box
     pygame.draw.rect(screen, fill, rect, border_radius=10)
     pygame.draw.rect(screen, BLACK, rect, 2, border_radius=10)

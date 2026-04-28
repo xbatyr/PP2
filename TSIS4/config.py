@@ -1,4 +1,5 @@
 def load_config():
+    # db settings
     return {
         "host": "localhost",
         "database": "phonebook_db",

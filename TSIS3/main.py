@@ -7,6 +7,7 @@ from racer import BLACK, BLUE, CAR_COLORS, FPS, HEIGHT, RacerGame, WHITE, WIDTH,
 from ui import Button, draw_box, draw_text
 
 
+# main window setup
 pygame.init()
 
 screen = pygame.display.set_mode((WIDTH, HEIGHT))
@@ -26,6 +27,7 @@ game = None
 result = None
 saved_result = False
 
+# menu buttons
 menu_buttons = [
     ("play", Button(120, 180, 160, 45, "Play")),
     ("leaderboard", Button(120, 240, 160, 45, "Leaderboard")),
@@ -53,6 +55,7 @@ difficulty_buttons = [
 
 
 def open_game():
+    # start new race
     global game, state, saved_result
     player_name = name.strip() or "Player"
     game = RacerGame(settings, player_name)
@@ -61,6 +64,7 @@ def open_game():
 
 
 def draw_menu():
+    # draw menu screen
     screen.fill((216, 228, 242))
     draw_box(screen, pygame.Rect(40, 35, 320, 88), (238, 244, 250))
     draw_text(screen, "TSIS 3 RACER", title_font, BLACK, WIDTH // 2, 79, True)
@@ -72,6 +76,7 @@ def draw_menu():
 
 
 def draw_name_screen():
+    # screen for player name
     screen.fill((235, 240, 245))
     draw_text(screen, "Enter Your Name", title_font, BLACK, WIDTH // 2, 120, True)
     draw_box(screen, pygame.Rect(70, 220, 260, 55))
@@ -83,6 +88,7 @@ def draw_name_screen():
 
 
 def draw_settings():
+    # show settings and car
     screen.fill((232, 239, 231))
     draw_text(screen, "Settings", title_font, BLACK, WIDTH // 2, 85, True)
 
@@ -103,6 +109,7 @@ def draw_settings():
 
 
 def draw_leaderboard():
+    # show best results
     screen.fill((245, 238, 228))
     draw_text(screen, "Top 10 Leaderboard", title_font, BLACK, WIDTH // 2, 65, True)
     draw_box(screen, pygame.Rect(30, 110, 340, 430))
@@ -120,6 +127,7 @@ def draw_leaderboard():
 
 
 def draw_game_over():
+    # end screen
     screen.fill((245, 230, 230) if not result["win"] else (228, 245, 228))
     title = "Finished!" if result["win"] else "Game Over"
     draw_text(screen, title, title_font, BLACK, WIDTH // 2, 115, True)
@@ -136,6 +144,7 @@ def draw_game_over():
 
 running = True
 while running:
+    # handle input by screen
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             running = False
@@ -222,6 +231,7 @@ while running:
         draw_leaderboard()
 
     elif state == "game":
+        # update race and save once
         game.update()
         game.draw(screen, font, small_font)
 

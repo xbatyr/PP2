@@ -8,6 +8,7 @@ from db import get_db_error, get_personal_best, get_top_scores, init_db, save_re
 from game import BLACK, COLOR_OPTIONS, DOWN, FPS, HEIGHT, LEFT, ORANGE, PURPLE, RED, RIGHT, SnakeGame, UP, WHITE, WIDTH
 
 
+# snake menu and screens
 pygame.init()
 
 BASE_DIR = os.path.dirname(__file__)
@@ -23,6 +24,7 @@ BLUE = (90, 150, 255)
 
 
 def load_settings():
+    # load settings or make new ones
     if not os.path.exists(SETTINGS_FILE):
         save_settings(DEFAULT_SETTINGS)
         return DEFAULT_SETTINGS.copy()
@@ -35,6 +37,7 @@ def load_settings():
 
 
 def save_settings(settings):
+    # save settings to json
     with open(SETTINGS_FILE, "w", encoding="utf-8") as file:
         json.dump(settings, file, indent=2)
 
@@ -45,7 +48,7 @@ class Button:
         self.text = text
 
     def draw(self, screen, font, active=False):
-        # hover makes buttons feel more alive
+        # button colors for hover
         color = BLUE if active else (235, 235, 235)
         if self.rect.collidepoint(pygame.mouse.get_pos()):
             color = (245, 245, 245) if not active else (110, 180, 255)
@@ -87,6 +90,7 @@ color_buttons = [(color, Button(245 + i * 80, 390, 60, 40, "")) for i, color in 
 
 
 def start_game():
+    # start new snake game
     global game, state, result_saved
     name = username.strip() or "Player"
     best = get_personal_best(name)
@@ -96,6 +100,7 @@ def start_game():
 
 
 def draw_text(text, x, y, color=BLACK, center=False, use_small=False, use_title=False):
+    # draw text on screen
     current_font = title_font if use_title else small_font if use_small else font
     image = current_font.render(str(text), True, color)
     rect = image.get_rect()
@@ -107,15 +112,17 @@ def draw_text(text, x, y, color=BLACK, center=False, use_small=False, use_title=
 
 
 def draw_panel(rect):
+    # draw simple panel
     pygame.draw.rect(screen, (242, 246, 248), rect, border_radius=12)
     pygame.draw.rect(screen, BLACK, rect, 2, border_radius=12)
 
 
 def draw_menu():
+    # draw main menu
     screen.fill((224, 236, 228))
     draw_panel(pygame.Rect(150, 40, 500, 110))
     draw_text("TSIS 4 SNAKE", WIDTH // 2, 90, center=True, use_title=True)
-    # name is typed right in the menu
+    # type name here
     draw_text("Username", 240, 170)
     draw_panel(pygame.Rect(240, 200, 320, 46))
     draw_text(username or "Type name here...", 258, 212, PURPLE if username else (120, 120, 120), use_small=not username)
@@ -125,6 +132,7 @@ def draw_menu():
 
 
 def draw_settings_screen():
+    # draw settings screen
     screen.fill((233, 239, 248))
     draw_text("Settings", WIDTH // 2, 80, center=True, use_title=True)
     draw_text(f"Grid: {'On' if settings['grid'] else 'Off'}", 250, 170)
@@ -142,6 +150,7 @@ def draw_settings_screen():
 
 
 def draw_leaderboard():
+    # draw leaderboard
     screen.fill((247, 239, 230))
     draw_text("Leaderboard", WIDTH // 2, 65, center=True, use_title=True)
     draw_panel(pygame.Rect(55, 100, 690, 400))
@@ -153,7 +162,7 @@ def draw_leaderboard():
 
     y = 155
     if top_scores:
-        # show top 10 from postgres
+        # show top 10 rows
         for i, row in enumerate(top_scores, start=1):
             date_text = row[3].strftime("%Y-%m-%d") if row[3] else "-"
             draw_text(i, 85, y, use_small=True)
@@ -174,6 +183,7 @@ def draw_leaderboard():
 
 
 def draw_game_over():
+    # draw game over screen
     screen.fill((245, 229, 229))
     draw_text("Game Over", WIDTH // 2, 100, RED, True, use_title=True)
     draw_panel(pygame.Rect(220, 160, 360, 190))
@@ -188,6 +198,7 @@ def draw_game_over():
 
 
 def handle_menu_click(pos):
+    # handle menu clicks
     global state, top_scores, running
     for action, button in menu_buttons:
         if not button.rect.collidepoint(pos):
@@ -205,7 +216,7 @@ def handle_menu_click(pos):
 
 
 def handle_game_keys(key):
-    # arrows and wasd do the same thing
+    # keys for snake move
     if key in (pygame.K_UP, pygame.K_w):
         game.change_direction(UP)
     elif key in (pygame.K_DOWN, pygame.K_s):
@@ -217,13 +228,14 @@ def handle_game_keys(key):
 
 
 def handle_settings_click(pos):
+    # change settings here
     global state
     if grid_button.rect.collidepoint(pos):
         settings["grid"] = not settings["grid"]
     elif sound_button.rect.collidepoint(pos):
         settings["sound"] = not settings["sound"]
     else:
-        # click a color box to repaint the snake
+        # click color box
         for color, button in color_buttons:
             if button.rect.collidepoint(pos):
                 settings["snake_color"] = color
@@ -235,7 +247,7 @@ def handle_settings_click(pos):
 
 running = True
 while running:
-    # each screen has its own small event logic
+    # handle events by screen
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             running = False
@@ -286,7 +298,7 @@ while running:
         draw_leaderboard()
 
     elif state == "game":
-        # save result once after game over
+        # save result one time
         game.update()
         game.draw(screen, font, small_font)
         if game.over and not result_saved:

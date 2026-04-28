@@ -4,6 +4,7 @@ import random
 import pygame
 
 
+# game sizes and colors
 WIDTH = 400
 HEIGHT = 650
 FPS = 60
@@ -44,6 +45,7 @@ ASSET_DIR = os.path.abspath(os.path.join(BASE_DIR, "..", "Practice11", "racer"))
 
 
 def load_image(name, size):
+    # load image if it exists
     path = os.path.join(ASSET_DIR, name)
     if os.path.exists(path):
         image = pygame.image.load(path)
@@ -58,7 +60,7 @@ COIN_IMAGE = load_image("coin.png", (26, 26))
 
 
 def draw_car_sprite(screen, x, y, color_name="blue", enemy=False):
-    # use practice11 images if they exist
+    # draw car image or simple car
     image = ENEMY_IMAGE if enemy else PLAYER_IMAGE
     color = CAR_COLORS.get(color_name, BLUE)
 
@@ -80,6 +82,7 @@ def draw_car_sprite(screen, x, y, color_name="blue", enemy=False):
 
 
 def draw_coin_sprite(screen, x, y, weight, font):
+    # draw coin and value
     if COIN_IMAGE:
         rect = COIN_IMAGE.get_rect(center=(x, y))
         screen.blit(COIN_IMAGE, rect)
@@ -101,7 +104,7 @@ class RacerGame:
         self.reset()
 
     def reset(self):
-        # player state
+        # reset all game data
         self.player_lane = 1
         self.player_x = LANES[1]
         self.target_x = LANES[1]
@@ -129,14 +132,14 @@ class RacerGame:
         self.message = "GO!"
         self.message_time = 70
 
-        # road objects
+        # objects on road
         self.coins_list = []
         self.traffic = []
         self.hazards = []
         self.events = []
         self.powerups = []
 
-        # timers
+        # spawn timers
         self.coin_timer = 0
         self.traffic_timer = 0
         self.hazard_timer = 0
@@ -144,6 +147,7 @@ class RacerGame:
         self.power_timer = 0
 
     def beep(self):
+        # make beep if sound is on
         if self.settings.get("sound"):
             print("\a", end="")
 
@@ -155,6 +159,7 @@ class RacerGame:
         return pygame.Rect(self.player_x - 21, self.player_y - 36, 42, 72)
 
     def handle_event(self, event):
+        # move left or right
         if event.type != pygame.KEYDOWN:
             return
 
@@ -166,6 +171,7 @@ class RacerGame:
             self.target_x = LANES[self.player_lane]
 
     def lane_busy(self, lane):
+        # stop overlap at start
         for items in [self.coins_list, self.traffic, self.hazards, self.powerups]:
             for item in items:
                 if item["lane"] == lane and item["y"] < 140:
@@ -179,7 +185,7 @@ class RacerGame:
         return False
 
     def blocked_lanes(self):
-        # these are lanes that are dangerous right now
+        # bad lanes now
         blocked = set()
 
         for item in self.traffic:
@@ -221,6 +227,7 @@ class RacerGame:
         return random.choice(lanes)
 
     def speed_now(self):
+        # speed gets higher
         level = 1 + self.progress // 700
         speed = BASE_SPEED[self.settings["difficulty"]]
         speed += level * 0.28
@@ -236,12 +243,13 @@ class RacerGame:
         return max(4, speed)
 
     def spawn_coin(self):
+        # coin can be in any lane
         lane = self.pick_lane(False)
         weight = random.choices([1, 2, 3], weights=[50, 30, 20])[0]
         self.coins_list.append({"lane": lane, "x": LANES[lane], "y": -30, "weight": weight})
 
     def spawn_traffic(self):
-        # do not create full road lock
+        # keep one free lane
         if self.moving_barrier_active() or len(self.blocked_lanes()) >= 2:
             return
 
@@ -253,7 +261,7 @@ class RacerGame:
         self.traffic.append({"lane": lane, "x": LANES[lane], "y": -90, "color_name": color_name})
 
     def spawn_hazards(self):
-        # keep at least one free lane
+        # hazards must not block all lanes
         if self.moving_barrier_active():
             return
 
@@ -272,7 +280,7 @@ class RacerGame:
             kind = random.choice(["barrier", "oil", "pothole"])
             self.hazards.append({"lane": lane, "x": LANES[lane], "y": -40, "kind": kind})
 
-            # if another lane is already blocked, add only one new hazard
+            # add one more hazard only
             if blocked or random.random() < 0.5:
                 break
 
@@ -536,7 +544,7 @@ class RacerGame:
         screen.blit(font.render(f"Left: {left_text}", True, BLACK), (18, 88))
         screen.blit(small_font.render(self.power_text(), True, BLUE), (250, 16))
 
-        # finish bar
+        # draw finish line
         pygame.draw.rect(screen, LIGHT_GRAY, (250, 44, 130, 12), border_radius=6)
         fill = int(130 * min(1, self.distance / self.finish_distance))
         pygame.draw.rect(screen, GREEN, (250, 44, fill, 12), border_radius=6)
@@ -602,7 +610,7 @@ class RacerGame:
         self.draw_events(screen)
         self.draw_powerups(screen, small_font)
 
-        # blink after shield or repair
+        # blink after hit
         if self.hit_cooldown > 0 and self.hit_cooldown % 8 < 4:
             pygame.draw.circle(screen, CYAN, (int(self.player_x), self.player_y), 34, 3)
 

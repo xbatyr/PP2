@@ -3,6 +3,7 @@ import random
 import pygame
 
 
+# board sizes and colors
 WIDTH = 800
 HEIGHT = 600
 CELL = 20
@@ -43,7 +44,7 @@ class SnakeGame:
         self.reset()
 
     def reset(self):
-        # start in the middle like a classic snake
+        # start new game
         self.snake = [(COLS // 2, ROWS // 2), (COLS // 2 - 1, ROWS // 2), (COLS // 2 - 2, ROWS // 2)]
         self.direction = RIGHT
         self.next_direction = RIGHT
@@ -54,7 +55,7 @@ class SnakeGame:
         self.shield = False
         self.effect = ""
         self.effect_end = 0
-        # let the first move happen right away
+        # move at once
         self.last_move = pygame.time.get_ticks() - 130
         self.message = ""
         self.message_end = 0
@@ -66,7 +67,7 @@ class SnakeGame:
         self.power = None
 
     def move_delay(self):
-        # smaller delay means more responsive movement
+        # high level means less delay
         delay = 130 - (self.level - 1) * 8
         if self.effect == "speed":
             delay -= 35
@@ -75,7 +76,7 @@ class SnakeGame:
         return max(55, delay)
 
     def free_cell(self, extra=()):
-        # find a free place for food, poison or power-up
+        # find free cell
         blocked = set(self.snake) | self.obstacles | set(extra)
         while True:
             cell = (random.randint(1, COLS - 2), random.randint(1, ROWS - 2))
@@ -83,7 +84,7 @@ class SnakeGame:
                 return cell
 
     def make_food(self):
-        # normal food from practice 11
+        # food can give more points
         cell = self.free_cell()
         weight = random.choices([1, 2, 3], weights=[50, 35, 15])[0]
         color = RED if weight == 1 else ORANGE if weight == 2 else YELLOW
@@ -93,19 +94,20 @@ class SnakeGame:
         return {"cell": self.free_cell([self.food["cell"]]), "color": (120, 0, 0)}
 
     def make_power(self):
-        # only one power-up is active at a time
+        # only one power item
         kind = random.choice(["speed", "slow", "shield"])
         color = CYAN if kind == "speed" else PURPLE if kind == "slow" else WHITE
         return {"cell": self.free_cell([self.food["cell"], self.poison["cell"]]), "kind": kind, "color": color, "end": pygame.time.get_ticks() + 8000}
 
     def set_message(self, text):
+        # show short game message
         if self.settings["sound"]:
             print("\a", end="")
         self.message = text
         self.message_end = pygame.time.get_ticks() + 1200
 
     def change_direction(self, direction):
-        # compare with next_direction so fast turns feel correct
+        # stop reverse turn
         if direction[0] != -self.next_direction[0] or direction[1] != -self.next_direction[1]:
             self.next_direction = direction
 
@@ -122,12 +124,13 @@ class SnakeGame:
         return False
 
     def make_obstacles(self):
+        # add walls after level 2
         if self.level < 3:
             self.obstacles = set()
             return
 
         head = self.snake[0]
-        # keep space around the snake so new walls feel fair
+        # keep safe space near head
         safe = {
             head,
             (head[0] + 1, head[1]),
@@ -149,18 +152,20 @@ class SnakeGame:
         self.power = None
 
     def eat_food(self):
+        # add score and maybe level up
         self.score += self.food["weight"] * 10
         self.foods += 1
         self.personal_best = max(self.personal_best, self.score)
         self.food = self.make_food()
 
-        # every 4 foods means next level
+        # 4 foods means next level
         if self.foods % 4 == 0:
             self.level += 1
             self.make_obstacles()
             self.set_message(f"Level {self.level}")
 
     def eat_poison(self):
+        # poison makes snake shorter
         for _ in range(2):
             if len(self.snake) > 1:
                 self.snake.pop()
@@ -170,6 +175,7 @@ class SnakeGame:
             self.over = True
 
     def eat_power(self):
+        # use power item
         if self.power["kind"] == "shield":
             self.shield = True
             self.effect = ""
@@ -190,11 +196,12 @@ class SnakeGame:
         return "Power: none"
 
     def update(self):
+        # update game state
         now = pygame.time.get_ticks()
         if self.over:
             return
 
-        # timers for food and power-ups
+        # remove old food and power
         if now > self.food["end"]:
             self.food = self.make_food()
         if self.power and now > self.power["end"]:
@@ -208,14 +215,14 @@ class SnakeGame:
         if now - self.last_move < self.move_delay():
             return
 
-        # move only after the delay passes
+        # move after delay
         self.last_move = now
         self.direction = self.next_direction
         head = self.next_head()
         will_grow = head == self.food["cell"]
 
         hit_wall = head[0] < 0 or head[0] >= COLS or head[1] < 0 or head[1] >= ROWS
-        # moving into the tail is okay if the tail moves away this frame
+        # tail can move away now
         body = self.snake if will_grow else self.snake[:-1]
         hit_self = head in body
         hit_block = head in self.obstacles
@@ -226,7 +233,7 @@ class SnakeGame:
             self.over = True
             return
 
-        # new head goes to the front
+        # add new head
         self.snake.insert(0, head)
 
         if head == self.food["cell"]:
@@ -241,16 +248,18 @@ class SnakeGame:
             self.eat_power()
 
     def draw_cell(self, screen, cell, color, border=None):
+        # draw one cell
         rect = pygame.Rect(cell[0] * CELL, cell[1] * CELL, CELL, CELL)
         pygame.draw.rect(screen, color, rect)
         if border:
             pygame.draw.rect(screen, border, rect, 2)
 
     def draw(self, screen, font, small_font):
+        # draw all game parts
         screen.fill(BLACK)
 
         if self.settings["grid"]:
-            # light grid helps see the cells better
+            # draw grid
             for x in range(0, WIDTH, CELL):
                 pygame.draw.line(screen, GRID_COLOR, (x, 0), (x, HEIGHT))
             for y in range(0, HEIGHT, CELL):
@@ -267,7 +276,7 @@ class SnakeGame:
         self.draw_cell(screen, self.poison["cell"], self.poison["color"], WHITE)
 
         if self.power:
-            # short letters keep the power-up easy to read
+            # draw short power text
             self.draw_cell(screen, self.power["cell"], self.power["color"], BLACK)
             letter = "S" if self.power["kind"] == "shield" else "+" if self.power["kind"] == "speed" else "-"
             txt = small_font.render(letter, True, BLACK)

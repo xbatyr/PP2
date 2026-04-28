@@ -5,6 +5,7 @@ try:
 except ModuleNotFoundError:
     psycopg2 = None
 
+# last db error
 LAST_DB_ERROR = ""
 
 
@@ -25,6 +26,7 @@ CREATE TABLE IF NOT EXISTS game_sessions (
 
 
 def connect():
+    # open postgres connection
     global LAST_DB_ERROR
     if not psycopg2:
         LAST_DB_ERROR = "psycopg2 is not installed"
@@ -46,6 +48,7 @@ def connect():
 
 
 def close_db(conn, cur=None):
+    # close cursor and connection
     if cur:
         cur.close()
     if conn:
@@ -53,6 +56,7 @@ def close_db(conn, cur=None):
 
 
 def init_db():
+    # make tables if needed
     conn = connect()
     if not conn:
         return False
@@ -71,6 +75,7 @@ def init_db():
 
 
 def get_player_id(cur, username):
+    # get old player or make new one
     cur.execute("SELECT id FROM players WHERE username = %s", (username,))
     row = cur.fetchone()
     if row:
@@ -81,6 +86,7 @@ def get_player_id(cur, username):
 
 
 def save_result(username, score, level):
+    # save one game result
     conn = connect()
     if not conn:
         return False
@@ -103,6 +109,7 @@ def save_result(username, score, level):
 
 
 def get_personal_best(username):
+    # get best score
     if not username:
         return 0
     conn = connect()
@@ -131,6 +138,7 @@ def get_personal_best(username):
 
 
 def get_top_scores():
+    # get top 10 scores
     conn = connect()
     if not conn:
         return []
@@ -157,4 +165,5 @@ def get_top_scores():
 
 
 def get_db_error():
+    # return last db error
     return LAST_DB_ERROR

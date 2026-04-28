@@ -2,6 +2,7 @@ import json
 import os
 
 
+# files for settings and scores
 BASE_DIR = os.path.dirname(__file__)
 SETTINGS_FILE = os.path.join(BASE_DIR, "settings.json")
 LEADERBOARD_FILE = os.path.join(BASE_DIR, "leaderboard.json")
@@ -14,19 +15,23 @@ DEFAULT_SETTINGS = {
 
 
 def load_json(path, default):
+    # make file if missing
     if not os.path.exists(path):
         save_json(path, default)
         return default.copy() if isinstance(default, dict) else list(default)
 
     try:
+        # read json file
         with open(path, "r", encoding="utf-8") as file:
             return json.load(file)
     except Exception:
+        # use default if file is bad
         save_json(path, default)
         return default.copy() if isinstance(default, dict) else list(default)
 
 
 def save_json(path, data):
+    # save data to json
     with open(path, "w", encoding="utf-8") as file:
         json.dump(data, file, indent=2)
 
@@ -44,6 +49,7 @@ def load_leaderboard():
 
 
 def add_score(name, score, distance, coins):
+    # keep only top 10
     scores = load_leaderboard()
     scores.append(
         {
